@@ -47,3 +47,74 @@ In addition, it's worth mentioning these scripts were developed for use in a
 GUI/desktop environment. That means the scripts assume they are already running
 in a `dbus` session of some kind. This will only really come up if, say, you're
 trying to run the scripts from a `systemd` daemon of some kind.
+
+# DBUS Basics
+If you're just trying to wrap your head around `dbus`, I figure I can impart
+some basic knowledge to get you started. First off, I highly recommend you
+download the `d-feet` program. This program allows you to inspect `dbus`
+interfaces and makes understanding and visualizing your machine's `dbus`
+environment **much** easier.
+
+Anyway, there's a lot of documents out there that will cover the actual
+programmatic structure of how `dbus` works. Personally, I recommend
+[this one](https://dbus.freedesktop.org/doc/dbus-tutorial.html).
+For this brief summary, we don't care about that - all we care about are the
+external parts that we actually need to interface with.
+
+So, at the top level, you have multiple **buses** - typically a single
+*system bus* and multiple *session buses*. The different `dbus` interfaces are
+spread across these buses. Each bus is specified by it's **address**. It's
+possible to communicate across buses as long as you know those addresses.
+
+The session buses are just what they sound like - it's the bus for your current
+session. The scripts here exclusively use the current session bus. Since users
+generally only have one login session going on, they generally only have one
+session bus. Obviously there's ways to start new sessions, but that falls
+outside what we need for this document.
+
+Anyway, when programs connect to a `dbus` bus, the connection itself is given a
+unique name. This name is referred to as the **Bus Name** - it's the name *on*
+the bus, not the name *of* the bus. Programs can actually request their own
+unique bus names, which typically take the form of
+`org.[organization].[program name]`. For example, `org.pulseaudio.Server`.
+
+The connection can then have a number of **objects** on it. Mostly I've seen
+only one object per connection, but I have seen multiple objects before. Objects
+are given an **Object Path** to identify them. They look like a file path, like
+`/org/mozilla/firefox/Remote`.
+
+Objects can then have a number of **interfaces** on them. Rather confusingly,
+these are name similarly to the bus names, using a dot notation. It's not
+unusual to see an interface name and a bus name that are almost exactly the
+same, if not *exactly* the same. This may also appear very similar to the object
+path. For example, one interface I inspected looked like so:
+
+- Bus Name: `io.snapcraft.Store`
+- Object Path: `/org/freedesktop/PackageKit`
+- Interface: `org.freedesktop.PackageKit.Modify`
+
+Finally, underneath interfaces, we have signals, methods, and properties. These
+are the actual parts of DBUS that we can interact with.
+
+Methods are effectively functions we can call and get output from.
+
+Properties are akin to variables we can check and set.
+
+Signals are a bit trickier. The best way to describe them is as messages that
+can we can listen for.
+
+Methods, properties, and signals are all addressed using dot notation. This is
+added on to the interface name. As an example, the full path for the method
+`Introspect` on `org.freedesktop.DBUS.Introspectable` would be
+`org.freedesktop.DBUS.Introspectable.Introspect`.
+
+It sort of a series of nesting dolls. The documentation I linked earlier renders
+it like so:
+
+```
+Address -> [Bus Name] -> Path -> Interface -> Method
+```
+
+That surface level knowledge should be enough to understand what's happening in
+these scripts.
+
