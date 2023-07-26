@@ -1,6 +1,13 @@
 # vlc-dbus-bash
 A collection of Bash scripts to control VLC Media Player over `dbus`.
 
+NOTE: There are actually two repos for this project. One on
+[GitLab](https://gitlab.com/CluckeyMcCormick/vlc-dbus-bash), since that's my
+personal preference, and one on
+[GitHub](https://github.com/CluckeyMcCormick/vlc-dbus-bash) since that has more
+visibility. The GitLab repo is considered the main one, with the GitHub project
+being a simple mirror.
+
 # Background
 I originally created this repo for personal use. I was working on a project
 that more-or-less mapped physical button pushes to `bash` commands. I wanted to
