@@ -98,50 +98,76 @@ function _status {
     fi
 }
 
+# Toggle between pausing and playing
 function _pauseplay {
-    echo "Pause (or play)"
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $PLAYER_INTERFACE.PlayPause
 }
 
+# Go to next track
 function _next {
-    echo "next track"
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $PLAYER_INTERFACE.Next
 }
 
+# Go to previous track
 function _prev {
-    echo "previous track"
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $PLAYER_INTERFACE.Previous
 }
 
+# Set the loop mode to loop the whole playlist
 function _loopplaylist {
-    echo "loop playlist"
+    _setValue $PLAYER_INTERFACE string:LoopStatus variant:string:Playlist
 }
 
-function _loopsong {
-    echo "loop song"
+# Set the loop mode to loop the current track
+function _looptrack {
+    _setValue $PLAYER_INTERFACE string:LoopStatus variant:string:Track
 }
 
+# Set the loop mode to no looping at all
 function _noloop {
-    echo "no loop"
+    _setValue $PLAYER_INTERFACE string:LoopStatus variant:string:None
 }
 
+# Turn on shuffle
 function _shuffleon {
-    echo "shuffle on"
+    _setValue $PLAYER_INTERFACE string:Shuffle variant:boolean:true
 }
 
+# Turn off shuffle
 function _shuffleoff {
-    echo "shuffle off"
+    _setValue $PLAYER_INTERFACE string:Shuffle variant:boolean:false
 }
 
+# Set the rate
 function _rate {
-    echo "play rate $1"
+    _setValue $PLAYER_INTERFACE string:Rate "variant:double:$1"
 }
 
+# Set the volume
 function _volume {
-    echo "set volume $1"
+    _setValue $PLAYER_INTERFACE string:Volume "variant:double:$1"
 }
 
+# Add a song or file
 function _add {
-    echo "add song or file $1"
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $TRACKS_INTERFACE.AddTrack \
+        "string:file://$1" "objpath:/org/mpris/MediaPlayer2/TrackList/NoTrack" \
+        boolean:false
 }
 
+# Add a song or file
+function _addplay {
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $TRACKS_INTERFACE.AddTrack \
+        "string:file://$1" "objpath:/org/mpris/MediaPlayer2/TrackList/NoTrack" \
+        boolean:true
+}
+
+# Clear the current playlist
 function _clear {
     echo "clear playlist"
 }
@@ -202,8 +228,8 @@ while [[ $# -gt 0 ]]; do
             exit_val=$?
             shift # past argument
             ;;
-        loopsong)
-            _loopsong
+        looptrack)
+            _looptrack
             exit_val=$?
             shift # past argument
             ;;
@@ -236,6 +262,12 @@ while [[ $# -gt 0 ]]; do
             ;;
         add)
             _add "$2"
+            exit_val=$?
+            shift # past argument
+            shift # past value
+            ;;
+        addplay)
+            _addplay "$2"
             exit_val=$?
             shift # past argument
             shift # past value
