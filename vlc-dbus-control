@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# The bus name we'll always be targeting
+BUS_NAME="org.mpris.MediaPlayer2.vlc"
+
+# The object path we'll always be targeting.
+OBJ_PATH="/org/mpris/MediaPlayer2"
+
+# Interface used to get, and set, properties across all interfaces
+PROPS_INTERFACE="org.freedesktop.DBus.Properties"
+
+# Interface used to control the VLC window, and the program overall
+WINDOW_INTERFACE="org.mpris.MediaPlayer2"
+
+# Interface used to control the active song
+PLAYER_INTERFACE="org.mpris.MediaPlayer2.Player"
+
+# Interface used to control the available tracks
+TRACKS_INTERFACE="org.mpris.MediaPlayer2.TrackList"
+
+# Function to get a value. Outputs to stdout and stderr. Return code 0 indicates
+# success, other values indicate errors. Takes 2 arguments: first, an interface
+# name (one of the "INTERFACE" variables above). Second, a property to retrieve.
+# This must be in the format described in dbus-send - i.e. "string:CanQuit".
+function _getValue {
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $PROPS_INTERFACE.Get \
+        string:$1 $2
+}
+
+# Function to set a value. Outputs to stdout and stderr. Return code 0 indicates
+# success, other values indicate errors. Takes 3 arguments: first, an interface
+# name (one of the "INTERFACE" variables above). Second, a property to set. This
+# must be in the format described in dbus-send - i.e. "string:CanQuit". Third,
+# the value for the property to be set TO. This must also be in the dbus-send
+# format.
+function _setValue {
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $PROPS_INTERFACE.Set \
+        string:$1 $2 $3
+}
+
+# Utility function to quickly check if a dbus VLC instance is alive and
+# available. Return code 0 indicates program is alive, return code 1 indicates
+# program is dead/unavailable.
+function _isAlive {
+    _getValue $WINDOW_INTERFACE string:CanQuit > /dev/null 2>&1
+}
+
+# Function to forecefully kill any running VLC instances forcefully.
+function kill {
+    pkill vlc
+}
+
+# Starts the VLC program if no VLC dbus is alive
+function start {
+    # Check if we're alive
+    _isAlive
+    # Capture success value
+    val=$?
+    
+    # Now check what the return code was...
+    if [ $val -eq 0 ]; then
+        # If we were able to query anything at all, then VLC is most likely
+        # already running!
+        echo "VLC appears to already be running."
+    else
+        # Otherwise, we need to launch it. Start by killing any other VLC
+        # instance - we need to ensure this dbus vlc is the only running
+        # instance.
+        pkill vlc
+        
+        # Launch!
+        vlc --dbus
+    fi
+}
+
+# Politely asks the VLC program to quit
+function stop {
+    dbus-send --session --print-reply \
+        --dest=$BUS_NAME $OBJ_PATH $WINDOW_INTERFACE.Quit
+}
+
+# Checks the dbus status to see if the dbus program is alive
+function status {
+    # Check if we're alive
+    _isAlive
+    # Capture success value
+    val=$?
+
+    # Now check what the return code was...
+    if [ $val -eq 0 ]; then
+        # If we were able to query anything at all, then VLC is most likely
+        # already running!
+        echo "VLC appears to already be running."
+    else
+        echo "No DBUS enabled VLC found."
+    fi
+}
+
