@@ -48,12 +48,12 @@ function _isAlive {
 }
 
 # Function to forecefully kill any running VLC instances forcefully.
-function kill {
+function _kill {
     pkill vlc
 }
 
 # Starts the VLC program if no VLC dbus is alive
-function start {
+function _launch {
     # Check if we're alive
     _isAlive
     # Capture success value
@@ -76,13 +76,13 @@ function start {
 }
 
 # Politely asks the VLC program to quit
-function stop {
+function _quit {
     dbus-send --session --print-reply \
         --dest=$BUS_NAME $OBJ_PATH $WINDOW_INTERFACE.Quit
 }
 
 # Checks the dbus status to see if the dbus program is alive
-function status {
+function _status {
     # Check if we're alive
     _isAlive
     # Capture success value
@@ -92,9 +92,165 @@ function status {
     if [ $val -eq 0 ]; then
         # If we were able to query anything at all, then VLC is most likely
         # already running!
-        echo "VLC appears to already be running."
+        echo "VLC appears to be running."
     else
         echo "No DBUS enabled VLC found."
     fi
 }
 
+function _pauseplay {
+    echo "Pause (or play)"
+}
+
+function _next {
+    echo "next track"
+}
+
+function _prev {
+    echo "previous track"
+}
+
+function _loopplaylist {
+    echo "loop playlist"
+}
+
+function _loopsong {
+    echo "loop song"
+}
+
+function _noloop {
+    echo "no loop"
+}
+
+function _shuffleon {
+    echo "shuffle on"
+}
+
+function _shuffleoff {
+    echo "shuffle off"
+}
+
+function _rate {
+    echo "play rate $1"
+}
+
+function _volume {
+    echo "set volume $1"
+}
+
+function _add {
+    echo "add song or file $1"
+}
+
+function _clear {
+    echo "clear playlist"
+}
+
+# TODO: Find and remove a SPECIFIC track?
+
+exit_val=0
+
+#
+# The following code was based on code written by Bruno Bronosky, originally for
+# this stack overflow question:
+#
+# How do I parse command line arguments in Bash?
+#
+# https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
+#
+POSITIONAL_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        kill)
+            _kill
+            exit_val=$?
+            shift # past argument
+            ;;
+        launch)
+            _launch
+            exit_val=$?
+            shift # past argument
+            ;;
+        quit)
+            _quit
+            exit_val=$?
+            shift # past argument
+            ;;
+        status)
+            _status
+            exit_val=$?
+            shift # past argument
+            ;;
+        pauseplay)
+            _pauseplay
+            exit_val=$?
+            shift # past argument
+            ;;
+        next)
+            _next
+            exit_val=$?
+            shift # past argument
+            ;;
+        prev)
+            _prev
+            exit_val=$?
+            shift # past argument
+            ;;
+        loopplaylist)
+            _loopplaylist
+            exit_val=$?
+            shift # past argument
+            ;;
+        loopsong)
+            _loopsong
+            exit_val=$?
+            shift # past argument
+            ;;
+        noloop)
+            _noloop
+            exit_val=$?
+            shift # past argument
+            ;;
+        shuffleon)
+            _shuffleon
+            exit_val=$?
+            shift # past argument
+            ;;
+        shuffleoff)
+            _shuffleoff
+            exit_val=$?
+            shift # past argument
+            ;;
+        rate)
+            _rate "$2"
+            exit_val=$?
+            shift # past argument
+            shift # past value
+            ;;
+        volume)
+            _volume "$2"
+            exit_val=$?
+            shift # past argument
+            shift # past value
+            ;;
+        add)
+            _add "$2"
+            exit_val=$?
+            shift # past argument
+            shift # past value
+            ;;
+        clear)
+            _clear
+            exit_val=$?
+            shift # past argument
+            ;;
+        *)
+            echo "Unclear option - '$1'. Ignoring..."
+            exit_val=1
+            shift # past argument
+            ;;
+    esac
+done
+
+exit $exit_val
