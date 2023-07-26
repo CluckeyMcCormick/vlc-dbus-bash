@@ -169,7 +169,24 @@ function _addplay {
 
 # Clear the current playlist
 function _clear {
-    echo "clear playlist"
+    # Get a list of all the tracks in the playlist
+    obj_paths=$(_getValue $TRACKS_INTERFACE string:Tracks)
+    
+    # For each line in the output...
+    while IFS= read -r line; do
+        # Check the line. If it's not an object path line, then skip it.
+        if [[ ${line} != *"object path"* ]];then
+            continue
+        fi
+        # Otherwise, we've got an object path. Cut it out of the quotes that
+        # surround it.
+        strip_line=$(echo "$line" | cut -d'"' -f 2)
+        
+        # Request that the track in question be removed.
+        dbus-send --session --print-reply \
+            --dest=$BUS_NAME $OBJ_PATH $TRACKS_INTERFACE.RemoveTrack \
+            "objpath:$strip_line"
+    done <<< "$obj_paths"
 }
 
 # TODO: Find and remove a SPECIFIC track?
