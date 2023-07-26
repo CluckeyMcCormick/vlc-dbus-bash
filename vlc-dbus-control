@@ -233,7 +233,6 @@ exit_val=0
 #
 # https://stackoverflow.com/questions/192249/how-do-i-parse-command-line-arguments-in-bash
 #
-POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -335,6 +334,77 @@ while [[ $# -gt 0 ]]; do
             _clear
             exit_val=$?
             shift # past argument
+            ;;
+        help)
+            echo "Available subcommands are as follows:"
+            
+            echo -e "\tkill"
+            echo -e "\t\tForce kill all VLC instances."
+            echo
+            echo -e "\tlaunch"
+            echo -e "\t\tLaunch a dbus-enabled VLC instance if one isn't"
+            echo -e "\t\talready running. Will block until launched VLC"
+            echo -e "\t\tinstance is closed."
+            echo
+            echo -e "\tquit"
+            echo -e "\t\tRequest all dbus-enabled VLC instances quit."
+            echo
+            echo -e "\tstatus"
+            echo -e "\t\tCheck if a dbus-enabled VLC instance is running."
+            echo
+            echo -e "\tpauseplay"
+            echo -e "\t\tToggle between paused and playing."
+            echo
+            echo -e "\tnext"
+            echo -e "\t\tGo to the next track."
+            echo
+            echo -e "\tprev"
+            echo -e "\t\tGo to the previous track."
+            echo
+            echo -e "\tloopplaylist"
+            echo -e "\t\tSet the loop mode to loop the playlist."
+            echo
+            echo -e "\tlooptrack"
+            echo -e "\t\tSet the loop mode to loop the current track."
+            echo
+            echo -e "\tnoloop"
+            echo -e "\t\tTurn off looping."
+            echo
+            echo -e "\tshuffleon"
+            echo -e "\t\tTurn on shuffle mode."
+            echo
+            echo -e "\tshuffleoff"
+            echo -e "\t\tTurn off shuffle mode."
+            echo
+            echo -e "\trate"
+            echo -e "\t\tSet the playback rate. Expects an additional"
+            echo -e "\t\targument: the new rate value. This should be a"
+            echo -e "\t\tdecimal value, i.e. 1.25"
+            echo
+            echo -e "\tgetrate"
+            echo -e "\t\tPrints the current playback rate."
+            echo
+            echo -e "\tvolume"
+            echo -e "\t\tSet the playback volume. Expects an additional"
+            echo -e "\t\targument: the new volume level. This should be a"
+            echo -e "\t\tdecimal value, i.e. 0.95"
+            echo
+            echo -e "\tgetvolume"
+            echo -e "\t\tPrints the current playback volume."
+            echo
+            echo -e "\tadd"
+            echo -e "\t\tAdds the given file to the playlist. Expects an"
+            echo -e "\t\tadditional argument: an absolute file path."
+            echo
+            echo -e "\taddplay"
+            echo -e "\t\tAdds the given file to the playlist and plays it"
+            echo -e "\t\timmediately. Expects an additional argument: an"
+            echo -e "\t\tabsolute file path."
+            echo
+            echo -e "\tclear"
+            echo -e "\t\tRemoves all tracks from the current playlist."
+            
+            exit 0
             ;;
         *)
             echo "Unclear option - '$1'. Ignoring..."
