@@ -1,0 +1,7 @@
+#!/bin/bash
+
+BUS_NAME="org.mpris.MediaPlayer2.vlc"
+OBJ_PATH="/org/mpris/MediaPlayer2"
+INTERFACE="org.mpris.MediaPlayer2.Player"
+
+dbus-send --session --dest=$BUS_NAME $OBJ_PATH $INTERFACE.Next
