@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#
+# A script that builds off the controls in vlc-dbus-control to slowly fade out
+# the volume on a running VLC instance
+#
+
+# Grab the time for the fadeout, in seconds
+time_sec=$1
+
+# Grab the amount of increments for our fadeout
+increments=$2
+
+# Grab the current volume
+volume=$(vlc-dbus-control getvolume)
+
+# Calculate the interval - we'll sleep THIS amount of time between decrementing
+# the volume
+interval=$(echo "$time_sec / $increments" | bc -l)
+
+# Calculate the decrement - we'll go down by this much at every step
+decrement=$(echo "$volume / $increments" | bc -l)
+
+while (( $(echo "$volume > 0" |bc -l) )); do
+    # Calculate the new volume
+    new_volume=$(echo "$volume - $decrement"|bc -l)
+    
+    # Set the new volume
+    vlc-dbus-control volume $new_volume
+    
+    # Sleep
+    sleep $interval
+    
+    # Grab the current volume
+    volume=$(vlc-dbus-control getvolume)
+done

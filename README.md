@@ -48,6 +48,11 @@ GUI/desktop environment. That means the scripts assume they are already running
 in a `dbus` session of some kind. This will only really come up if, say, you're
 trying to run the scripts from a `systemd` daemon of some kind.
 
+# Install
+Any scripts that you want to run on your machine from anywhere should be
+installed (see: copied) to `~/.local/bin`. That should make them available on
+your command line. Running the scripts directly would also work.
+
 # DBUS Basics
 If you're just trying to wrap your head around `dbus`, I figure I can impart
 some basic knowledge to get you started. First off, I highly recommend you
