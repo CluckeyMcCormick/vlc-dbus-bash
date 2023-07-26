@@ -146,9 +146,41 @@ function _rate {
     _setValue $PLAYER_INTERFACE string:Rate "variant:double:$1"
 }
 
+# Get the rate
+function _getrate {
+    # Get the rate
+    rate=$(_getValue $PLAYER_INTERFACE string:Rate)
+    get_val=$?
+    
+    # Extract the rate from the message. grep -o will spit out only the exact
+    # matching text, so we use this to get just the type and the value. Then we
+    # can use cut to get just the value.
+    rate=$(echo "$rate" | grep -o "double .*" | cut -d' ' -f 2)
+    # Output to stdout
+    echo $rate
+    
+    return $get_val
+}
+
 # Set the volume
 function _volume {
     _setValue $PLAYER_INTERFACE string:Volume "variant:double:$1"
+}
+
+# Get the volume
+function _getvolume {
+    # Get the volume
+    volume=$(_getValue $PLAYER_INTERFACE string:Volume)
+    get_val=$?
+    
+    # Extract the rate from the message. grep -o will spit out only the exact
+    # matching text, so we use this to get just the type and the value. Then we
+    # can use cut to get just the value.
+    volume=$(echo "$volume" | grep -o "double .*" | cut -d' ' -f 2)
+    # Output to stdout
+    echo $volume
+    
+    return $get_val
 }
 
 # Add a song or file
@@ -271,11 +303,21 @@ while [[ $# -gt 0 ]]; do
             shift # past argument
             shift # past value
             ;;
+        getrate)
+            _getrate
+            exit_val=$?
+            shift # past argument
+            ;;
         volume)
             _volume "$2"
             exit_val=$?
             shift # past argument
             shift # past value
+            ;;
+        getvolume)
+            _getvolume
+            exit_val=$?
+            shift # past argument
             ;;
         add)
             _add "$2"
